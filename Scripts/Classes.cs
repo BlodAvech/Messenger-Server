@@ -5,6 +5,7 @@ public class Message
     public User User { get; set; }
     public string Text { get; set; }
     public DateTime? CreatedAt { get; set; } 
+    public int ExpiringTime  { get; set; } = 0;
 }
 
 public class User

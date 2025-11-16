@@ -92,17 +92,16 @@ public class ChatController : ControllerBase
     public IActionResult SendMessage(int chatId, [FromBody] Message msg)
     {
         msg.ChatId = chatId; 
-        chatService.SendMessage(msg);
+        if(msg.ExpiringTime == 0)
+		{
+			chatService.SendMessage(msg);
+		}else
+		{
+			chatService.SendExpiringMessage(msg , msg.ExpiringTime);
+		}
         return Ok("sent");
     }
 
-    [HttpPost("{chatId}/send/{seconds}")]
-    public IActionResult SendExpiringMessage(int chatId, [FromBody] Message msg , int seconds)
-    {
-        msg.ChatId = chatId; 
-        chatService.SendExpiringMessage(msg , seconds);
-        return Ok("sent");
-    }
 
     [HttpDelete("{chatId}/deleteMsg/{messageId}")]
     public IActionResult DeleteMessage(int chatId, int messageId, [FromBody] User user)
