@@ -1,27 +1,19 @@
-public class ChatService
+public class ChatService : IChatService
 {
     private readonly DatabaseManager _db;
     public ChatService(DatabaseManager db) => _db = db;
 
-    public delegate void UserEventHandler(User user);
+    // Реализация всех событий и методов интерфейса
     public event UserEventHandler OnUserRegistred;
     public event UserEventHandler OnUserLogined;
-
-    public delegate void ChatEventHandler(Chat chat, User? user1 = null, User? user2 = null);
     public event ChatEventHandler OnChatCreated;
     public event ChatEventHandler OnPrivateCreated;
-
-    public delegate void MessageEventHandler(Message message, User? user = null, int? seconds = null);
     public event MessageEventHandler OnMessageSended;
     public event MessageEventHandler OnMessageDeleted;
     public event MessageEventHandler OnExpiringMessageSended; 
     public event MessageEventHandler OnExpiringMessageDeleted;
-
-    public delegate void JoinEventHandler(Chat chat, User user, User? newUser = null);
     public event ChatEventHandler OnJoinToChat;
-    public event ChatEventHandler OnAddToChat;
-
-    public User LoginUser(User user)
+    public event ChatEventHandler OnAddToChat;    public User LoginUser(User user)
     {
         User newUser = _db.LoginUser(user.UserName, user.Password);
         OnUserLogined?.Invoke(newUser);
