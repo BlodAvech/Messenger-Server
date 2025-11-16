@@ -98,7 +98,7 @@ public class DatabaseManager : IDatabaseManager
 	}
 
 
-	public int SendMessage(int chatid, int userid, string text, int? seconds = null)
+	public int SendMessage(int chatid, int userid, string text)
 	{
 		var chatCheck = new NpgsqlCommand(
 			"SELECT type, ownerid FROM chats WHERE chatid=@chatid",
@@ -107,7 +107,7 @@ public class DatabaseManager : IDatabaseManager
 		chatCheck.Parameters.AddWithValue("@chatid", chatid);
 
 		int chatType;
-		int ownerId;
+		int? ownerId;
 
 		using (var reader = chatCheck.ExecuteReader())
 		{
@@ -115,8 +115,10 @@ public class DatabaseManager : IDatabaseManager
 				throw new InvalidOperationException("Чат не найден.");
 
 			chatType = reader.GetInt32(0);
-			ownerId = reader.GetInt32(1);
+
+			ownerId = reader.IsDBNull(1) ? null : reader.GetInt32(1);
 		}
+
 
 		if (chatType == 2 && userid != ownerId)
 			throw new InvalidOperationException("Только владелец может писать в этом канале.");
@@ -135,7 +137,7 @@ public class DatabaseManager : IDatabaseManager
 		}
 
     var insertCmd = new NpgsqlCommand(@"
-        INSERT INTO messages (chatid, userid, messagetext, createdat)
+        INSERT INTO messages (chatid, userid, messagetext, timestamp)
         VALUES (@chatid, @userid, @text, NOW())
         RETURNING messageid;
     ", connection);
@@ -145,25 +147,6 @@ public class DatabaseManager : IDatabaseManager
     insertCmd.Parameters.AddWithValue("@text", text);
 
     int newMessageId = (int)insertCmd.ExecuteScalar();
-
-    if (seconds.HasValue && seconds.Value > 0)
-    {
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(seconds.Value * 1000);
-
-            using var conn = new NpgsqlConnection(connection.ConnectionString);
-            conn.Open();
-
-            var updateCmd = new NpgsqlCommand(
-                "UPDATE messages SET messagetext='Message Expired' WHERE messageid=@msgid",
-                conn
-            );
-            updateCmd.Parameters.AddWithValue("@msgid", newMessageId);
-
-            updateCmd.ExecuteNonQuery();
-        });
-    }
 
     return newMessageId;
 }
@@ -197,7 +180,7 @@ public class DatabaseManager : IDatabaseManager
 
 	public Chat CreatePrivateChat(int user1Id, int user2Id)
 	{
-		// Проверка, существует ли уже чат между этими двумя
+		// Проверяем, есть ли уже чат
 		var checkCommand = new NpgsqlCommand(
 			@"SELECT c.chatid
 			FROM chats c
@@ -209,24 +192,56 @@ public class DatabaseManager : IDatabaseManager
 		checkCommand.Parameters.AddWithValue("@user1", user1Id);
 		checkCommand.Parameters.AddWithValue("@user2", user2Id);
 
-		object existingChat = checkCommand.ExecuteScalar();
+		object existingChatId = checkCommand.ExecuteScalar();
 		checkCommand.Dispose();
 
-		if (existingChat != null)
-			return (Chat)existingChat;
+		if (existingChatId != null)
+			return GetChat((int)existingChatId);
 
-		// Создаём новый чат
+		// Получаем имена пользователей
+		var nameCommand = new NpgsqlCommand(
+			@"SELECT userid, username 
+			FROM users 
+			WHERE userid = @u1 OR userid = @u2",
+			connection
+		);
+		nameCommand.Parameters.AddWithValue("@u1", user1Id);
+		nameCommand.Parameters.AddWithValue("@u2", user2Id);
+
+		string? name1 = null;
+		string? name2 = null;
+
+		using (var reader = nameCommand.ExecuteReader())
+		{
+			while (reader.Read())
+			{
+				int id = reader.GetInt32(0);
+				string name = reader.GetString(1);
+
+				if (id == user1Id) name1 = name;
+				else name2 = name;
+			}
+		}
+		nameCommand.Dispose();
+
+		if (name1 == null || name2 == null)
+			throw new Exception("User not found");
+
+		string chatName = $"{name1} — {name2}";
+
+		// Создаём чат
 		var createCommand = new NpgsqlCommand(
 			@"INSERT INTO chats (chatname, type) 
 			VALUES (@chatname, 0) 
 			RETURNING chatid",
 			connection
 		);
-		createCommand.Parameters.AddWithValue("@chatname", $"Личный чат {user1Id}-{user2Id}");
+		createCommand.Parameters.AddWithValue("@chatname", chatName);
+
 		int chatId = (int)(createCommand.ExecuteScalar() ?? -1);
 		createCommand.Dispose();
 
-		// Добавляем обоих пользователей
+		// Добавляем участников
 		var addMembers = new NpgsqlCommand(
 			"INSERT INTO chatmembers (chatid, userid) VALUES (@chatid, @userid1), (@chatid, @userid2)",
 			connection
@@ -239,6 +254,7 @@ public class DatabaseManager : IDatabaseManager
 
 		return GetChat(chatId);
 	}
+
 
 
 	public Chat CreateChat(string chatname, int ownerId, int type)

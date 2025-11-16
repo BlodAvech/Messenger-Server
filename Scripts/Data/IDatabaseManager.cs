@@ -14,7 +14,7 @@ public interface IDatabaseManager
     void DeleteChat(int chatid, int ownerId);
 
     // Сообщения
-    int SendMessage(int chatid, int userid, string message , int? seconds = null);
+    int SendMessage(int chatid, int userid, string message);
     void DeleteMessage(int messageId, int userid); 
 
     // Вспомогательные методы

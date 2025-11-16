@@ -1,3 +1,4 @@
+using System.Data.SqlTypes;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -27,10 +28,10 @@ public class ChatController : ControllerBase
     }
 
     // ----------------- Чаты -----------------
-    [HttpPost("private/create")]
-    public IActionResult CreatePrivateChat([FromBody] PrivateChatRequest req)
+    [HttpPost("createprivate/{user2Id}")]
+    public IActionResult CreatePrivateChat([FromBody] Chat chat , int user2Id)
     {
-        var chatId = chatService.CreatePrivateChat(req.User1, req.User2);
+        var chatId = chatService.CreatePrivateChat(chat.OwnerId, user2Id);
         return Ok(chatId);
     }
 

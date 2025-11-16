@@ -23,12 +23,6 @@ public class Chat
     public int OwnerId { get; set; }
 }
 
-// Вспомогательные DTO
-public class PrivateChatRequest
-{
-    public int User1 { get; set; }
-    public int User2 { get; set; }
-}
 
 public class AddUserRequest
 {
