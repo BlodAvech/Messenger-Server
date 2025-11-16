@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\topda\\Desktop\\Messenger Server\\Messenger.csproj": {}
+    "C:\\Users\\topda\\Desktop\\Messenger-Server\\Messenger.csproj": {}
   },
   "projects": {
-    "C:\\Users\\topda\\Desktop\\Messenger Server\\Messenger.csproj": {
+    "C:\\Users\\topda\\Desktop\\Messenger-Server\\Messenger.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\topda\\Desktop\\Messenger Server\\Messenger.csproj",
+        "projectUniqueName": "C:\\Users\\topda\\Desktop\\Messenger-Server\\Messenger.csproj",
         "projectName": "Messenger",
-        "projectPath": "C:\\Users\\topda\\Desktop\\Messenger Server\\Messenger.csproj",
+        "projectPath": "C:\\Users\\topda\\Desktop\\Messenger-Server\\Messenger.csproj",
         "packagesPath": "C:\\Users\\topda\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\topda\\Desktop\\Messenger Server\\obj\\",
+        "outputPath": "C:\\Users\\topda\\Desktop\\Messenger-Server\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

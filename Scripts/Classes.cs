@@ -1,14 +1,36 @@
-
-public class SendMessageDto
+public class Message
 {
-    public int UserId { get; set; }
+    public int MessageId { get; set; }
     public int ChatId { get; set; }
-    public string MessageText { get; set; }
+    public User User { get; set; }
+    public string Text { get; set; }
+    public DateTime? CreatedAt { get; set; } 
 }
 
-
-public class UserDto
+public class User
 {
-	public string Name{get;set;}
-    public string Password{get;set;}
+    public int UserId { get; set; }
+    public string UserName { get; set; }
+    public string? Password { get; set; } 
+}
+
+public class Chat
+{
+    public int ChatId { get; set; }
+    public string ChatName { get; set; }
+    public int Type { get; set; } 
+    public int OwnerId { get; set; }
+}
+
+// Вспомогательные DTO
+public class PrivateChatRequest
+{
+    public int User1 { get; set; }
+    public int User2 { get; set; }
+}
+
+public class AddUserRequest
+{
+    public int Owner { get; set; }
+    public int NewUser { get; set; }
 }
