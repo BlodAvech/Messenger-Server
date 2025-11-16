@@ -12,7 +12,7 @@ using (var scope = app.Services.CreateScope())
     var logger = scope.ServiceProvider.GetRequiredService<Logger>();
 }
 
-
 app.MapControllers();
 app.Urls.Add("http://0.0.0.0:5000");
 app.Run();
+

@@ -23,7 +23,6 @@ public class Chat
     public int OwnerId { get; set; }
 }
 
-
 public class AddUserRequest
 {
     public int Owner { get; set; }

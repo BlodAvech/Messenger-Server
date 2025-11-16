@@ -30,12 +30,14 @@ public class ChatService : IChatService
     public void SendMessage(Message msg)
     {
         OnMessageSended?.Invoke(msg, msg.User);
+        msg.Text = Sypher.Encode(msg.Text);
         _db.SendMessage(msg.ChatId, msg.User.UserId, msg.Text);
     }
 
     public async Task SendExpiringMessage(Message msg, int seconds)
     {
         OnExpiringMessageSended?.Invoke(msg, seconds: seconds);
+        msg.Text = Sypher.Encode(msg.Text);
         int msgId = _db.SendMessage(msg.ChatId, msg.User.UserId, msg.Text);
 
         await Task.Delay(seconds * 1000);
@@ -84,7 +86,15 @@ public class ChatService : IChatService
     public Chat GetChat(int chatId) => _db.GetChat(chatId);
 
     public List<User> GetChatMembers(Chat chat) => _db.GetChatMembers(chat.ChatId);
-    public List<Message> GetMessages(Chat chat) => _db.GetMessages(chat.ChatId);
+    public List<Message> GetMessages(Chat chat)
+	{
+	    List<Message> encodedMessages = _db.GetMessages(chat.ChatId);
+        encodedMessages.ForEach(msg =>
+        {
+            msg.Text = Sypher.Decode(msg.Text);
+        });
+        return encodedMessages;
+    }
 
     public List<Chat> GetChats(int user) => _db.GetChatsOfUser(user);
 }
