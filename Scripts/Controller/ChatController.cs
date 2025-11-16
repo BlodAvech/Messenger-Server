@@ -87,8 +87,6 @@ public class ChatController : ControllerBase
         return Ok(chatService.GetChat(chatId));
     }
 
-
-
     [HttpPost("{chatId}/send")]
     public IActionResult SendMessage(int chatId, [FromBody] Message msg)
     {
